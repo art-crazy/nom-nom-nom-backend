@@ -40,9 +40,9 @@ console.log('Database configuration:', {
 export class DatabaseModule implements OnModuleInit {
   constructor(private dataSource: DataSource) {}
 
-  async onModuleInit() {
+  onModuleInit() {
     if (this.dataSource.isInitialized) {
       console.log('✅ Successfully connected to the database');
     }
   }
-} 
+}
