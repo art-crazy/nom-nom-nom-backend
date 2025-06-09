@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Recipe } from '../entities/recipe.entity';
 
 interface RecipeFilters {
+  search?: string;
   dishCategories?: string[];
   subcategories?: string[];
   cuisineCategories?: string[];
@@ -29,6 +30,13 @@ export class RecipeService {
       .leftJoinAndSelect('recipe.dietCategories', 'dietCategories');
 
     if (filters) {
+      if (filters.search) {
+        queryBuilder.andWhere(
+          '(LOWER(recipe.name) LIKE LOWER(:search) OR LOWER(recipe.description) LIKE LOWER(:search))',
+          { search: `%${filters.search}%` }
+        );
+      }
+
       if (filters.dishCategories?.length) {
         queryBuilder.andWhere('dishCategories.id IN (:...dishCategories)', {
           dishCategories: filters.dishCategories,

@@ -68,4 +68,10 @@ export class RecipeResponseDto {
     example: 12
   })
   limit: number;
+
+  @ApiProperty({
+    description: 'Флаг, указывающий что был использован fallback (возвращены все рецепты)',
+    example: false
+  })
+  fallbackTriggered: boolean;
 } 
