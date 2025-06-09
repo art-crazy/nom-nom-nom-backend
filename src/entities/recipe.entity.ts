@@ -1,7 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Category } from './category.entity';
-import { Ingredient } from './ingredient.entity';
-import { Step } from './step.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('recipes')
@@ -148,4 +146,4 @@ export class Recipe {
   @ApiProperty({ description: 'Last update timestamp' })
   @UpdateDateColumn()
   updatedAt: Date;
-} 
+}
