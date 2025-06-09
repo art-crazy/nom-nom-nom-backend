@@ -2,6 +2,7 @@ import { Controller, Get, Query, Param, ParseIntPipe } from '@nestjs/common';
 import { RecipeService } from '../services/recipe.service';
 import { Recipe } from '../entities/recipe.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { RecipeDto, RecipeResponseDto } from './dto/recipe.dto';
 
 @ApiTags('Рецепты')
 @Controller('api/recipes')
@@ -10,7 +11,11 @@ export class RecipeController {
 
   @Get()
   @ApiOperation({ summary: 'Получить все рецепты с возможностью фильтрации' })
-  @ApiResponse({ status: 200, description: 'Возвращает список рецептов с пагинацией' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Возвращает список рецептов с пагинацией',
+    type: RecipeResponseDto
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Номер страницы' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Количество элементов на странице' })
   @ApiQuery({ name: 'dish_categories', required: false, type: String, description: 'ID категорий блюд через запятую' })
@@ -41,14 +46,22 @@ export class RecipeController {
 
   @Get('home')
   @ApiOperation({ summary: 'Получить рецепты для главной страницы' })
-  @ApiResponse({ status: 200, description: 'Возвращает список избранных рецептов' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Возвращает список избранных рецептов',
+    type: [RecipeDto]
+  })
   async findForHomePage() {
     return this.recipeService.findForHomePage();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Получить рецепт по ID' })
-  @ApiResponse({ status: 200, description: 'Возвращает рецепт по указанному ID' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Возвращает рецепт по указанному ID',
+    type: RecipeDto
+  })
   @ApiResponse({ status: 404, description: 'Рецепт не найден' })
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Recipe> {
     return this.recipeService.findOne(id);
