@@ -3,22 +3,22 @@ import { CollectionService } from '../services/collection.service';
 import { Collection } from '../entities/collection.entity';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('Collections')
-@Controller('collections')
+@ApiTags('Коллекции')
+@Controller('api/collections')
 export class CollectionController {
   constructor(private readonly collectionService: CollectionService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all collections' })
-  @ApiResponse({ status: 200, description: 'Returns a list of all active collections' })
+  @ApiOperation({ summary: 'Получить все коллекции' })
+  @ApiResponse({ status: 200, description: 'Возвращает список всех активных коллекций' })
   async findAll(): Promise<Collection[]> {
     return this.collectionService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get collection by ID' })
-  @ApiResponse({ status: 200, description: 'Returns a collection by ID' })
-  @ApiResponse({ status: 404, description: 'Collection not found' })
+  @ApiOperation({ summary: 'Получить коллекцию по ID' })
+  @ApiResponse({ status: 200, description: 'Возвращает коллекцию по указанному ID' })
+  @ApiResponse({ status: 404, description: 'Коллекция не найдена' })
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Collection> {
     return this.collectionService.findOne(id);
   }

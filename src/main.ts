@@ -12,20 +12,20 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Nom Nom Nom API')
-    .setDescription('API documentation for Nom Nom Nom Backend')
+    .setDescription('Документация API для бэкенда Nom Nom Nom')
     .setVersion('1.0')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
-    customSiteTitle: 'Nom Nom Nom API Documentation',
+    customSiteTitle: 'Nom Nom Nom API - Документация',
     swaggerOptions: {
       persistAuthorization: true,
     },
   });
 
   await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(`📚 API Documentation available at: http://localhost:${port}/api/docs`);
+  console.log(`🚀 Приложение запущено на: http://localhost:${port}`);
+  console.log(`📚 Документация API доступна по адресу: http://localhost:${port}/api/docs`);
 }
 bootstrap();
