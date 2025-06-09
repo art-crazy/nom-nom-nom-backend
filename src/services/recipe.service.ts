@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Recipe } from '../entities/recipe.entity';
 
 interface RecipeFilters {
@@ -23,31 +23,32 @@ export class RecipeService {
     filters?: RecipeFilters,
   ): Promise<{ recipes: Recipe[]; total: number; totalPages: number }> {
     const queryBuilder = this.recipeRepository.createQueryBuilder('recipe')
-      .leftJoinAndSelect('recipe.ingredients', 'ingredients')
-      .leftJoinAndSelect('recipe.steps', 'steps')
-      .leftJoinAndSelect('recipe.categories', 'categories');
+      .leftJoinAndSelect('recipe.dishCategories', 'dishCategories')
+      .leftJoinAndSelect('recipe.subcategories', 'subcategories')
+      .leftJoinAndSelect('recipe.cuisineCategories', 'cuisineCategories')
+      .leftJoinAndSelect('recipe.dietCategories', 'dietCategories');
 
     if (filters) {
       if (filters.dishCategories?.length) {
-        queryBuilder.andWhere('categories.id IN (:...dishCategories)', {
+        queryBuilder.andWhere('dishCategories.id IN (:...dishCategories)', {
           dishCategories: filters.dishCategories,
         });
       }
 
       if (filters.subcategories?.length) {
-        queryBuilder.andWhere('categories.id IN (:...subcategories)', {
+        queryBuilder.andWhere('subcategories.id IN (:...subcategories)', {
           subcategories: filters.subcategories,
         });
       }
 
       if (filters.cuisineCategories?.length) {
-        queryBuilder.andWhere('categories.id IN (:...cuisineCategories)', {
+        queryBuilder.andWhere('cuisineCategories.id IN (:...cuisineCategories)', {
           cuisineCategories: filters.cuisineCategories,
         });
       }
 
       if (filters.dietCategories?.length) {
-        queryBuilder.andWhere('categories.id IN (:...dietCategories)', {
+        queryBuilder.andWhere('dietCategories.id IN (:...dietCategories)', {
           dietCategories: filters.dietCategories,
         });
       }
@@ -66,7 +67,7 @@ export class RecipeService {
   async findOne(id: number): Promise<Recipe> {
     const recipe = await this.recipeRepository.findOne({
       where: { id },
-      relations: ['ingredients', 'steps', 'categories'],
+      relations: ['dishCategories', 'subcategories', 'cuisineCategories', 'dietCategories'],
     });
 
     if (!recipe) {
@@ -83,4 +84,4 @@ export class RecipeService {
       take: 12
     });
   }
-} 
+}
