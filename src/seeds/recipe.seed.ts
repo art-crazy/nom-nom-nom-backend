@@ -6,8 +6,8 @@ export async function seedRecipes(dataSource: DataSource) {
   const categoryRepository = dataSource.getRepository(Category);
   const recipeRepository = dataSource.getRepository(Recipe);
 
-  // Создаем категории
-  const categories: Partial<Category>[] = [
+  // Создаем категории, если они еще не существуют
+  const categories = [
     { slug: 'main-dishes', title: 'Основные блюда', type: 'dish' as const },
     { slug: 'snacks', title: 'Закуски', type: 'dish' as const },
     { slug: 'dumplings', title: 'Пельмени', type: 'subcategory' as const },
@@ -15,117 +15,1227 @@ export async function seedRecipes(dataSource: DataSource) {
     { slug: 'russian', title: 'Русская кухня', type: 'cuisine' as const },
     { slug: 'fusion', title: 'Фьюжн', type: 'cuisine' as const },
     { slug: 'traditional', title: 'Традиционная кухня', type: 'diet' as const },
-    { slug: 'meat', title: 'Мясные блюда', type: 'diet' as const },
+    { slug: 'meat', title: 'Мясные блюда', type: 'diet' as const }
   ];
 
-  await categoryRepository.save(categories);
+  const savedCategories = new Map<string, Category>();
+
+  for (const categoryData of categories) {
+    let category = await categoryRepository.findOne({ where: { slug: categoryData.slug } });
+    if (!category) {
+      category = categoryRepository.create(categoryData);
+      category = await categoryRepository.save(category);
+    }
+    savedCategories.set(categoryData.slug, category);
+  }
 
   // Создаем рецепты
   const recipes = [
     {
-      name: 'pelmeni-po-sibirski',
-      title: 'Пельмени по-сибирски (старый рецепт)',
-      description: 'Традиционные сибирские пельмени по старинному рецепту. Сочная мясная начинка в тонком тесте - классика русской кухни, которая никогда не выходит из моды.',
-      cookTime: '150 минут',
-      difficulty: '4/5',
-      nutrition: {
-        calories: { value: 282.5, unit: 'g' },
-        protein: { value: 15.8, unit: 'g' },
-        fat: { value: 12.3, unit: 'g' },
-        carbs: { value: 29.4, unit: 'g' },
-      },
-      cuisine: 'Русская',
-      servings: 8,
-      ingredients: [
-        { name: 'Мука пшеничная', amount: 1500, unit: 'g' },
-        { name: 'Яйцо куриное', amount: 3, unit: 'pcs' },
-        { name: 'Вода', amount: 500, unit: 'ml' },
-        { name: 'Соль', amount: 1, unit: 'tsp' },
-        { name: 'Фарш говяжий', amount: 1000, unit: 'g' },
-        { name: 'Фарш свиной', amount: 500, unit: 'g' },
-        { name: 'Лук репчатый', amount: 1000, unit: 'g' },
-        { name: 'Перец черный молотый', amount: 1, unit: 'tsp' },
-        { name: 'Чеснок', amount: 2, unit: 'pcs' },
-      ],
-      steps: [
-        {
-          image: '/hvorost/hvorost-na-kefire-1.webp',
-          title: 'Шаг 1: Подготовка фарша',
-          text: 'Пропустите через мясорубку говядину, свинину и репчатый лук. Добавьте измельченный чеснок, соль и перец. Тщательно перемешайте начинку до однородного состояния.'
-        },
-        {
-          image: '/hvorost/hvorost-na-kefire-2.webp',
-          title: 'Шаг 2: Замешиваем тесто',
-          text: 'В глубокой миске смешайте муку с солью. Взбейте яйца с водой и постепенно вливайте в муку, замешивая крутое тесто. Вымешивайте не менее 10-12 минут до эластичного состояния.'
-        },
-        {
-          image: '/hvorost/hvorost-na-kefire-5.webp',
-          title: 'Шаг 3: Раскатаем и лепим',
-          text: 'Разделите тесто на части. Раскатайте каждую часть в тонкий пласт. Вырежьте кружочки, выложите начинку и защипните края, формируя пельмени. Важно хорошо залепить края, чтобы начинка не вытекала при варке.'
-        },
-        {
-          image: '/hvorost/hvorost-na-kefire-6.webp',
-          title: 'Шаг 4: Варка',
-          text: 'Опустите пельмени в кипящую подсоленную воду. После всплытия варите 8 минут на среднем огне. Подавайте горячими со сметаной, маслом или бульоном.'
-        },
-      ],
-      imageMain: '/hvorost/hvorost-na-kefire-main-image-final.webp',
-      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
-      rating: 4.9,
-      reviews: 272,
-    },
-    {
-      name: 'shaurma-shashlychnaya',
-      title: 'Шаурма «Шашлычная»',
-      description: 'Аппетитная домашняя шаурма с сочным шашлыком из свинины и свежими овощами. Идеальное сочетание традиционного шашлыка в современной подаче - отличный вариант для пикника или домашнего обеда.',
+      name: 'pelme11',
+      title: '2Пельмени по-сибирски',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
       cookTime: '60 минут',
-      difficulty: '2/5',
-      nutrition: {
-        calories: { value: 139.57, unit: 'g' },
-        protein: { value: 5.97, unit: 'g' },
-        fat: { value: 9.07, unit: 'g' },
-        carbs: { value: 8.22, unit: 'g' },
-      },
+      difficulty: 'medium',
       cuisine: 'Русская',
-      servings: 2,
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
       ingredients: [
-        { name: 'Огурец', amount: 120, unit: 'g' },
-        { name: 'Помидор', amount: 90, unit: 'g' },
-        { name: 'Салат айсберг', amount: 20, unit: 'g' },
-        { name: 'Майонез постный', amount: 16, unit: 'g' },
-        { name: 'Сыр твердый', amount: 20, unit: 'g' },
-        { name: 'Свинина для шашлыка', amount: 80, unit: 'g' },
-        { name: 'Сок лимонный', amount: 20, unit: 'ml' },
-        { name: 'Лепешка пшеничная', amount: 40, unit: 'g' }
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
       ],
       steps: [
         {
-          image: '/hvorost/hvorost-na-kefire-1.webp',
-          title: 'Шаг 1: Подготовка овощей',
-          text: 'Тщательно вымойте все овощи. Нарежьте половину огурца, измельчите салат айсберг, нарежьте половину помидора. Сложите овощи в салатник.'
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
         },
         {
-          image: '/hvorost/hvorost-na-kefire-2.webp',
-          title: 'Шаг 2: Приготовление начинки',
-          text: 'Заправьте овощи постным майонезом. Натрите сыр на мелкой терке и добавьте к овощам. Сбрызните все лимонным соком и перемешайте.'
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
         },
         {
-          image: '/hvorost/hvorost-na-kefire-5.webp',
-          title: 'Шаг 3: Добавление мяса',
-          text: 'Готовый шашлык из свинины нарежьте небольшими кусочками и добавьте к овощной смеси. Шашлык должен быть предварительно приготовлен на мангале (30-40 минут).'
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
         },
         {
-          image: '/hvorost/hvorost-na-kefire-6.webp',
-          title: 'Шаг 4: Сборка шаурмы',
-          text: 'В центр пшеничной лепешки выложите 1-2 ложки начинки. Сверните шаурму удобным способом, постепенно добавляя оставшуюся начинку.'
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
         }
       ],
-      imageMain: '/hvorost/hvorost-na-kefire-main-image-final.webp',
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma',
+      title: '1Шаурма по-домашнему',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
       categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
-      rating: 4.7,
-      reviews: 19,
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'pelme11',
+      title: '2Пельмени по-сибирски',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma',
+      title: '1Шаурма по-домашнему',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'perec',
+      title: 'Перец',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'sol',
+      title: 'Соль',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'pelme11',
+      title: '2Пельмени по-сибирски',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma',
+      title: '1Шаурма по-домашнему',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'pelme11',
+      title: '2Пельмени по-сибирски',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma',
+      title: '1Шаурма по-домашнему',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'perec8',
+      title: 'Перец8',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'sol7',
+      title: 'Соль7',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'pelme116',
+      title: '2Пельмени по-сибирски6',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma5',
+      title: '1Шаурма по-домашнему5',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'pelme114',
+      title: '2Пельмени по-сибирски4',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'shaurma3',
+      title: '1Шаурма по-домашнему3',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
+    },
+    {
+      name: 'perec2',
+      title: 'Перец2',
+      description: 'Классические сибирские пельмени с сочной начинкой из трех видов мяса',
+      cookTime: '60 минут',
+      difficulty: 'medium',
+      cuisine: 'Русская',
+      servings: 4,
+      nutrition: {
+        calories: { value: 350, unit: 'ккал' },
+        protein: { value: 20, unit: 'г' },
+        carbs: { value: 40, unit: 'г' },
+        fat: { value: 15, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Мука пшеничная', amount: 500, unit: 'г' },
+        { name: 'Яйцо', amount: 1, unit: 'шт' },
+        { name: 'Вода', amount: 200, unit: 'мл' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Говядина', amount: 300, unit: 'г' },
+        { name: 'Свинина', amount: 200, unit: 'г' },
+        { name: 'Баранина', amount: 100, unit: 'г' },
+        { name: 'Лук репчатый', amount: 2, unit: 'шт' },
+        { name: 'Черный перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/pelmeni/step1.jpg',
+          title: 'Приготовление теста',
+          text: 'Приготовить тесто из муки, яйца, воды и соли'
+        },
+        {
+          image: '/pelmeni/step2.jpg',
+          title: 'Подготовка фарша',
+          text: 'Пропустить мясо через мясорубку'
+        },
+        {
+          image: '/pelmeni/step3.jpg',
+          title: 'Добавление специй',
+          text: 'Добавить мелко нарезанный лук и специи'
+        },
+        {
+          image: '/pelmeni/step4.jpg',
+          title: 'Раскатка теста',
+          text: 'Раскатать тесто и вырезать кружки'
+        },
+        {
+          image: '/pelmeni/step5.jpg',
+          title: 'Лепка пельменей',
+          text: 'Слепить пельмени'
+        },
+        {
+          image: '/pelmeni/step6.jpg',
+          title: 'Варка',
+          text: 'Варить в подсоленной воде 5-7 минут'
+        }
+      ],
+      imageMain: '/pelmeni.jpg',
+      categories: ['пельмени', 'русская кухня', 'сибирская кухня', 'второе блюдо', 'домашняя кухня', 'мясные блюда', 'традиционное блюдо', 'обед', 'ужин'],
+      rating: 4.8,
+      reviews: 2,
+      dishCategories: [savedCategories.get('main-dishes')],
+      subcategories: [savedCategories.get('dumplings')],
+      cuisineCategories: [savedCategories.get('russian')],
+      dietCategories: [savedCategories.get('traditional'), savedCategories.get('meat')]
+    },
+    {
+      name: 'sol1',
+      title: 'Соль1',
+      description: 'С1очная шаурма с курицей, свежими овощами и ароматным соусом',
+      cookTime: '30 минут',
+      difficulty: 'easy',
+      cuisine: 'Фьюжн',
+      servings: 2,
+      nutrition: {
+        calories: { value: 450, unit: 'ккал' },
+        protein: { value: 25, unit: 'г' },
+        carbs: { value: 35, unit: 'г' },
+        fat: { value: 20, unit: 'г' }
+      },
+      ingredients: [
+        { name: 'Лаваш', amount: 4, unit: 'шт' },
+        { name: 'Куриное филе', amount: 500, unit: 'г' },
+        { name: 'Огурцы', amount: 2, unit: 'шт' },
+        { name: 'Помидоры', amount: 2, unit: 'шт' },
+        { name: 'Капуста', amount: 200, unit: 'г' },
+        { name: 'Майонез', amount: 100, unit: 'г' },
+        { name: 'Кетчуп', amount: 50, unit: 'г' },
+        { name: 'Чеснок', amount: 2, unit: 'зуб' },
+        { name: 'Соль', amount: 1, unit: 'ч.л' },
+        { name: 'Перец', amount: 1, unit: 'ч.л' }
+      ],
+      steps: [
+        {
+          image: '/shaurma/step1.jpg',
+          title: 'Подготовка курицы',
+          text: 'Нарезать курицу тонкими полосками и обжарить'
+        },
+        {
+          image: '/shaurma/step2.jpg',
+          title: 'Нарезка овощей',
+          text: 'Нарезать овощи соломкой'
+        },
+        {
+          image: '/shaurma/step3.jpg',
+          title: 'Приготовление соуса',
+          text: 'Приготовить соус из майонеза, кетчупа и чеснока'
+        },
+        {
+          image: '/shaurma/step4.jpg',
+          title: 'Подготовка лаваша',
+          text: 'Разогреть лаваш'
+        },
+        {
+          image: '/shaurma/step5.jpg',
+          title: 'Сборка шаурмы',
+          text: 'Выложить начинку и соус'
+        },
+        {
+          image: '/shaurma/step6.jpg',
+          title: 'Завертывание',
+          text: 'Завернуть шаурму'
+        }
+      ],
+      imageMain: '/shaurma.jpg',
+      categories: ['закуски', 'уличная еда', 'фастфуд', 'шаурма', 'мясные блюда', 'для пикника', 'обед', 'перекус'],
+      rating: 4.5,
+      reviews: 2,
+      dishCategories: [savedCategories.get('snacks')],
+      subcategories: [savedCategories.get('street-food')],
+      cuisineCategories: [savedCategories.get('fusion')],
+      dietCategories: []
     }
   ];
 
-  await recipeRepository.save(recipes);
-} 
+  // Сохраняем рецепты
+  for (const recipeData of recipes) {
+    const existingRecipe = await recipeRepository.findOne({ where: { name: recipeData.name } });
+    if (!existingRecipe) {
+      const recipe = recipeRepository.create(recipeData as unknown as Partial<Recipe>);
+      await recipeRepository.save(recipe);
+    }
+  }
+}
