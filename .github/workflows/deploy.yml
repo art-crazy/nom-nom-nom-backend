@@ -1,4 +1,4 @@
-name: Build and Deploy Mentor Hub Backend
+name: Build and Deploy Nom-nom-nom Backend
 
 on:
   push:
@@ -55,9 +55,9 @@ jobs:
       - name: Deploy files
         run: |
           # Transfer each file/folder separately
-          scp -i ~/.ssh/id_rsa -r deployment/dist ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/mentor-hub-api/
-          scp -i ~/.ssh/id_rsa deployment/package.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/mentor-hub-api/
-          scp -i ~/.ssh/id_rsa deployment/package-lock.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/mentor-hub-api/
+          scp -i ~/.ssh/id_rsa -r deployment/dist ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/nom-nom-nom-api/
+          scp -i ~/.ssh/id_rsa deployment/package.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/nom-nom-nom-api/
+          scp -i ~/.ssh/id_rsa deployment/package-lock.json ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/var/www/nom-nom-nom-api/
 
       - name: Install and start
         run: |
@@ -65,14 +65,14 @@ jobs:
             set -ex  # Enable debug mode
 
             # Go to app directory
-            cd /var/www/mentor-hub-api
+            cd /var/www/nom-nom-nom-api
 
             # Install dependencies (production only)
             npm ci --production
 
             # Restart application
-            pm2 delete mentor-hub-api || true
-            pm2 start dist/main.js --name \"mentor-hub-api\" --update-env
+            pm2 delete nom-nom-nom-api || true
+            pm2 start dist/main.js --name \"nom-nom-nom-api\" --update-env
             pm2 save
 
             # Verify
@@ -81,5 +81,5 @@ jobs:
             echo '### Running Processes ###'
             ps aux | grep node
             echo '### App Files ###'
-            ls -la /var/www/mentor-hub-api/dist
+            ls -la /var/www/nom-nom-nom-api/dist
           "
