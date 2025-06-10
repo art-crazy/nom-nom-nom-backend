@@ -4,7 +4,7 @@ import { RecipeService } from '../services/recipe.service';
 import { RecipeResponseDto } from './dto/recipe.dto';
 
 @ApiTags('Рецепты')
-@Controller('api/recipes')
+@Controller('recipes')
 export class RecipeController {
   constructor(private readonly recipeService: RecipeService) {}
 
