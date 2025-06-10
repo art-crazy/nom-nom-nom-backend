@@ -38,25 +38,25 @@ export class RecipeService {
       }
 
       if (filters.dishCategories?.length) {
-        queryBuilder.andWhere('dishCategories.id IN (:...dishCategories)', {
+        queryBuilder.andWhere('dishCategories.slug IN (:...dishCategories)', {
           dishCategories: filters.dishCategories,
         });
       }
 
       if (filters.subcategories?.length) {
-        queryBuilder.andWhere('subcategories.id IN (:...subcategories)', {
+        queryBuilder.andWhere('subcategories.slug IN (:...subcategories)', {
           subcategories: filters.subcategories,
         });
       }
 
       if (filters.cuisineCategories?.length) {
-        queryBuilder.andWhere('cuisineCategories.id IN (:...cuisineCategories)', {
+        queryBuilder.andWhere('cuisineCategories.slug IN (:...cuisineCategories)', {
           cuisineCategories: filters.cuisineCategories,
         });
       }
 
       if (filters.dietCategories?.length) {
-        queryBuilder.andWhere('dietCategories.id IN (:...dietCategories)', {
+        queryBuilder.andWhere('dietCategories.slug IN (:...dietCategories)', {
           dietCategories: filters.dietCategories,
         });
       }
