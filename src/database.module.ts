@@ -1,9 +1,6 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
-import { DataSource } from 'typeorm';
-import { seedRecipes } from './seeds/recipe.seed';
-import { Recipe } from './entities/recipe.entity';
 
 const dbConfig: DataSourceOptions = {
   type: 'postgres',
@@ -12,7 +9,9 @@ const dbConfig: DataSourceOptions = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: true,
+  synchronize: false,
+  migrations: ['src/migrations/*.js'],
+  migrationsRun: true,
   ssl: {
     rejectUnauthorized: false
   },
@@ -39,20 +38,4 @@ console.log('Database configuration:', {
     }),
   ],
 })
-export class DatabaseModule implements OnModuleInit {
-  constructor(private dataSource: DataSource) {}
-
-  async onModuleInit() {
-    if (this.dataSource.isInitialized) {
-      console.log('✅ Successfully connected to the database');
-      
-      // Проверяем, есть ли уже данные в базе
-      const recipeCount = await this.dataSource.getRepository(Recipe).count();
-      if (recipeCount === 0) {
-        console.log('🌱 Seeding database with initial data...');
-        await seedRecipes(this.dataSource);
-        console.log('✅ Database seeded successfully');
-      }
-    }
-  }
-}
+export class DatabaseModule {}
