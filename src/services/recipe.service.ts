@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Recipe } from '../entities/recipe.entity';
+import { Recipe } from '@/entities/recipe.entity';
 
 interface RecipeFilters {
   search?: string;
@@ -32,7 +32,7 @@ export class RecipeService {
     if (filters) {
       if (filters.search) {
         queryBuilder.andWhere(
-          '(LOWER(recipe.name) LIKE LOWER(:search) OR LOWER(recipe.description) LIKE LOWER(:search))',
+          '(LOWER(recipe.name) LIKE LOWER(:search) OR LOWER(recipe.title) LIKE LOWER(:search) OR LOWER(recipe.description) LIKE LOWER(:search))',
           { search: `%${filters.search}%` }
         );
       }
