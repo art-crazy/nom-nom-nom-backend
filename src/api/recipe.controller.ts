@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { RecipeService } from '../services/recipe.service';
+import { RecipeService } from '@/services/recipe.service';
 import { RecipeResponseDto } from './dto/recipe.dto';
 
 @ApiTags('Рецепты')
@@ -10,8 +10,8 @@ export class RecipeController {
 
   @Get()
   @ApiOperation({ summary: 'Получить все рецепты с возможностью фильтрации' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Возвращает список рецептов с пагинацией',
     type: RecipeResponseDto
   })
@@ -63,6 +63,7 @@ export class RecipeController {
         page: pageNum,
         limit: limitNum,
         fallbackTriggered: true,
+        test: 'test'
       };
     }
 
@@ -72,6 +73,7 @@ export class RecipeController {
       page: pageNum,
       limit: limitNum,
       fallbackTriggered: false,
+      test: 'test'
     };
   }
-} 
+}
