@@ -1,5 +1,5 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Query, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { RecipeService } from '@/services/recipe.service';
 import { RecipeResponseDto } from './dto/recipe.dto';
 
@@ -73,5 +73,22 @@ export class RecipeController {
       limit: limitNum,
       fallbackTriggered: false,
     };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Получить рецепт по ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает рецепт по указанному ID',
+    type: RecipeResponseDto
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Рецепт не найден'
+  })
+  @ApiParam({ name: 'id', required: true, type: Number, description: 'ID рецепта' })
+  async findOne(@Param('id') id: string) {
+    const recipe = await this.recipeService.findOne(parseInt(id));
+    return recipe;
   }
 }
