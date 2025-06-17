@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
 import { DataSource } from 'typeorm';
 import { seedRecipes } from './seeds/recipe.seed';
+import { Recipe } from './entities/recipe.entity';
 
 const dbConfig: DataSourceOptions = {
   type: 'postgres',
@@ -46,7 +47,7 @@ export class DatabaseModule implements OnModuleInit {
       console.log('✅ Successfully connected to the database');
       
       // Проверяем, есть ли уже данные в базе
-      const recipeCount = await this.dataSource.getRepository('recipes').count();
+      const recipeCount = await this.dataSource.getRepository(Recipe).count();
       if (recipeCount === 0) {
         console.log('🌱 Seeding database with initial data...');
         await seedRecipes(this.dataSource);
