@@ -63,7 +63,6 @@ export class RecipeController {
         page: pageNum,
         limit: limitNum,
         fallbackTriggered: true,
-        test: 'test'
       };
     }
 
@@ -73,7 +72,6 @@ export class RecipeController {
       page: pageNum,
       limit: limitNum,
       fallbackTriggered: false,
-      test: 'test'
     };
   }
 }

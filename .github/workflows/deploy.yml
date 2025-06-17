@@ -70,16 +70,22 @@ jobs:
             # Install dependencies (production only)
             npm ci --production
 
-            # Restart application
+            # Restart application with proper error handling
+            echo '### Stopping existing application ###'
+            pm2 stop nom-nom-nom-api || true
             pm2 delete nom-nom-nom-api || true
+
+            echo '### Starting application ###'
             pm2 start dist/main.js --name \"nom-nom-nom-api\" --update-env
             pm2 save
 
-            # Verify
-            echo '### PM2 Status ###'
+            echo '### Waiting for application to start ###'
+            sleep 5
+
+            echo '### Checking application status ###'
             pm2 list
-            echo '### Running Processes ###'
-            ps aux | grep node
-            echo '### App Files ###'
+            pm2 logs nom-nom-nom-api --lines 20
+
+            echo '### Verifying application files ###'
             ls -la /var/www/nom-nom-nom-api/dist
           "
