@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@/app.module';
-import { RecipeService } from '@/services/recipe.service';
 import { CategoryService } from '@/services/category.service';
 import { recipes as recipes1 } from '../data/recipes';
 import { recipes as recipes2 } from '../data/ID101-200';
@@ -9,18 +8,15 @@ import { recipes as recipes3 } from '../data/ID201-300';
 import { Recipe } from '@/entities/recipe.entity';
 import { Category } from '@/entities/category.entity';
 import { Recipe as RecipeType } from '../types/recipe';
+import { Repository } from 'typeorm';
 
-interface CategoryData {
-  id: string;
-  title: string;
-}
 
 type RecipeData = RecipeType;
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const recipeService = app.get(RecipeService);
   const categoryService = app.get(CategoryService);
+  const recipeRepository = app.get(Repository<Recipe>);
 
   try {
     // Объединяем все рецепты
@@ -109,7 +105,7 @@ async function bootstrap() {
     for (const recipe of Object.values(allRecipes)) {
       try {
         // Проверяем, существует ли уже рецепт с таким именем
-        const existingRecipe = await recipeService.findByName(recipe.name);
+        const existingRecipe = await recipeRepository.findOne({ where: { name: recipe.name } });
         if (existingRecipe) {
           console.log(`Пропускаем рецепт "${recipe.title}" - уже существует`);
           continue;
@@ -152,7 +148,7 @@ async function bootstrap() {
           .map(cat => categories.get(cat.id))
           .filter(Boolean) as Category[];
 
-        await recipeService.create(recipeEntity);
+        await recipeRepository.save(recipeEntity);
         console.log(`Импортирован рецепт: ${recipe.title}`);
       } catch (error) {
         console.error(`Ошибка при импорте рецепта "${recipe.title}":`, error.message);
