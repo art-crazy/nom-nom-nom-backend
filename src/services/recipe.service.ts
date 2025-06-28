@@ -75,6 +75,7 @@ export class RecipeService {
   async findOne(id: number): Promise<Recipe> {
     const recipe = await this.recipeRepository.findOne({
       where: { id },
+      select: ['id', 'name', 'title', 'description', 'cookTime', 'difficulty', 'nutrition', 'cuisine', 'servings', 'ingredients', 'steps', 'imageMain', 'categories', 'rating', 'reviews', 'videoUrl', 'createdAt', 'updatedAt'],
       relations: ['dishCategories', 'subcategories', 'cuisineCategories', 'dietCategories'],
     });
 

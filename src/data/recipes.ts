@@ -38,6 +38,7 @@ export interface Recipe {
   dishCategoriesSubList: { [key: string]: { id: string; title: string } };
   cuisineCategoriesList: { [key: string]: { id: string; title: string } };
   dietCategoriesList: { [key: string]: { id: string; title: string } };
+  videoUrl?: string;
 }
 
 // Рецепты

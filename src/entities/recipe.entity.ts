@@ -1,11 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToMany, JoinTable, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { Category } from './category.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('recipes')
 export class Recipe {
   @ApiProperty({ description: 'Unique identifier of the recipe' })
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: number;
 
   @ApiProperty({ description: 'Unique name/slug of the recipe' })
@@ -102,6 +102,10 @@ export class Recipe {
   @ApiProperty({ description: 'Number of reviews' })
   @Column()
   reviews: number;
+
+  @ApiProperty({ description: 'Video URL for the recipe' })
+  @Column({ type: 'varchar', nullable: true })
+  videoUrl: string | null;
 
   @ApiProperty({ type: () => [Category], description: 'Dish categories' })
   @ManyToMany(() => Category)
